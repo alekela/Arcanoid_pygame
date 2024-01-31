@@ -1,5 +1,4 @@
 Arcanoid game on pygame
-Need to:
-1) Add collisions, when platform has speed
-2) Add random colors to bricks
-3) Add end words if player win or lose
+To do:
+1) Add color to bricks and field for custom levels
+2) Correct collisions with platform at speed
