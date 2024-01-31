@@ -1,5 +1,5 @@
 import pygame
-from classes import Ball, Platform, Brick
+from classes import Ball, Platform, Level
 
 w = 600
 h = 600
@@ -10,13 +10,15 @@ pygame.draw.rect(screen, 'white', [1, 1, w - 2, h - 2], 2)
 running = True
 ball = Ball(screen, 300, 494)
 platform = Platform(screen)
+level = Level(screen, 40, 20)
 
-fps = 10
+
+fps = 100
 clock = pygame.time.Clock()
 platform_right = False
 platform_left = False
 while running:
-    clock.tick(1000 // fps)
+    clock.tick(fps)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -31,11 +33,16 @@ while running:
             if event.key == pygame.K_d:
                 platform_right = False
     if platform_right:
-        platform.update(screen, 1)
+        platform.update_velocity(2)
     if platform_left:
-        platform.update(screen, -1)
-    ball.update(screen, 1 / fps)
-    ball.collide_with_platform(platform)
-    running = ball.endgame(screen)
+        platform.update_velocity(-2)
+    if not (platform_left or platform_right):
+        platform.update_velocity(0)
+
+    level.check_all_collisions(ball, platform)
+    level.update_figures(ball, platform)
+    if level.endgame_check(ball):
+        running = False
+    level.draw_level()
     pygame.draw.rect(screen, 'white', [1, 1, w - 2, h - 2], 2)
     pygame.display.flip()
