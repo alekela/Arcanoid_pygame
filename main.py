@@ -10,7 +10,7 @@ pygame.draw.rect(screen, 'white', [1, 1, w - 2, h - 2], 2)
 running = True
 ball = Ball(screen, 300, 494)
 platform = Platform(screen)
-level = Level(screen, 40, 20)
+level = Level(screen, 200, 100)
 
 
 fps = 100
@@ -41,8 +41,22 @@ while running:
 
     level.check_all_collisions(ball, platform)
     level.update_figures(ball, platform)
-    if level.endgame_check(ball):
-        running = False
+    endgame = level.endgame_check(ball)
+    if endgame != 0:
+        font = pygame.font.SysFont('comicsans', 30)
+        if endgame == 1:
+            text = font.render("Congratulations! You've won!!!", True, 'white', 'black')
+        else:
+            text = font.render("Oh no!!! You've lost! Try again!", True, 'white', 'black')
+        textRect = text.get_rect()
+        textRect.center = (300, 300)
+        screen.blit(text, textRect)
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
+            pygame.display.update()
     level.draw_level()
     pygame.draw.rect(screen, 'white', [1, 1, w - 2, h - 2], 2)
     pygame.display.flip()

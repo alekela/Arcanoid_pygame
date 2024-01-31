@@ -46,7 +46,7 @@ class Level:
         ball_vx, ball_vy = ball.get_velocity()
         if plat_x - plat_dx / 2 < ball_x < plat_x + plat_dx / 2:
             if plat_y - ball_r - plat_dy / 2 < ball_y + ball_vy < plat_y + plat_dy / 2:
-                ball.update_velocity(ball_vx, -ball_vy)
+                ball.update_velocity(ball_vx - 0.3 * platform.get_velocity(), -ball_vy)
 
     def check_collision_with_brick(self, ball):
         ball_x, ball_y = ball.get_pos()
@@ -55,18 +55,18 @@ class Level:
         for i in range(self.bh):
             for j in range(self.bw):
                 if self.bricks[i][j]:
-                    if self.start_point[1] + self.brick_sizey * i <= ball_y + ball_vy <= \
-                            self.start_point[1] + self.brick_sizey * (i + 1):
-                        if self.start_point[0] + self.brick_sizex * j <= ball_x + ball_vx <= \
-                                self.start_point[0] + self.brick_sizex * (j + 1):
+                    if self.start_point[1] + self.brick_sizey * i - ball.get_radius() <= ball_y + ball_vy <= \
+                            self.start_point[1] + self.brick_sizey * (i + 1) + ball.get_radius():
+                        if self.start_point[0] + self.brick_sizex * j - ball.get_radius() <= ball_x + ball_vx <= \
+                                self.start_point[0] + self.brick_sizex * (j + 1) + ball.get_radius():
                             self.erase_brick(j, i)
                             self.bricks[i][j] = 0
                             flag = True
-                            if ball_y > self.start_point[1] + self.brick_sizey * (i + 1) \
-                                    or ball_y < self.start_point[1] + self.brick_sizey * i:
+                            if ball_y > self.start_point[1] + self.brick_sizey * (i + 1) + ball.get_radius() \
+                                    or ball_y < self.start_point[1] + self.brick_sizey * i - ball.get_radius():
                                 ball.update_velocity(ball_vx, -ball_vy)
-                            elif ball_x > self.start_point[0] + self.brick_sizex * (j + 1) \
-                                    or ball_x < self.start_point[0] + self.brick_sizex * j:
+                            elif ball_x > self.start_point[0] + self.brick_sizex * (j + 1) + ball.get_radius() \
+                                    or ball_x < self.start_point[0] + self.brick_sizex * j - ball.get_radius():
                                 ball.update_velocity(-ball_vx, ball_vy)
                             break
             if flag:
@@ -79,13 +79,23 @@ class Level:
         vx, vy = ball.get_velocity()
         if 2 + radius >= x + vx or x + vx >= w - 2 - radius:
             ball.update_velocity(-vx, vy)
-        if 2 + radius >= y + vy or y + vy >= h - 2 - radius:
+        if 2 + radius >= y + vy:
             ball.update_velocity(vx, -vy)
 
     def endgame_check(self, ball):
         ball_y = ball.get_pos()[1]
         ball_vy = ball.get_velocity()[1]
-        return ball_y >= self.field.get_size()[1] - 5 - 2 * ball_vy
+        check1 = False
+        for i in self.bricks:
+            if 1 in i:
+                check1 = True
+
+        if check1 and ball_y + ball_vy < self.field.get_size()[1] - ball.get_radius():
+            return 0
+        elif not check1:
+            return 1
+        elif ball_y + ball_vy >= self.field.get_size()[1] - ball.get_radius():
+            return -1
 
     def update_figures(self, ball, platform):
         ball.update(self.field)
@@ -104,7 +114,7 @@ class Ball:
         self.radius = 2
         pygame.draw.circle(field, 'white', [x, y], self.radius, 0)
         self.Vx = randint(1, 3) / 2
-        self.Vy = -randint(2, 4) / 2
+        self.Vy = -randint(3, 4) / 2
 
     def get_pos(self):
         return self.x, self.y
